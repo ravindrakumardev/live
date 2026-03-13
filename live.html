@@ -1,246 +1,517 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
- <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title> live</title>
-
-  <script>
-</script>
-
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.7.11/shaka-player.ui.min.js" crossorigin="anonymous"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.7.11/controls.min.css" crossorigin="anonymous">
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <title>Allinone Live TV Hub</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    html, body {
-      background: #000;
-      height: 100vh;
-      width: 100vw;
-      overflow: hidden;
-      font-family: system-ui, -apple-system, sans-serif;
-    }
-    .shaka-video-container {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-    }
-    video {
-      width: 100%;
-      height: 100%;
-      background: #000;
-      object-fit: contain;
-    }
-    .shaka-spinner-container,
-    .shaka-spinner,
-    .shaka-spinner-svg {
-      display: none !important;
-      visibility: hidden !important;
-      opacity: 0 !important;
+    :root {
+      --primary: #00ffff;
+      --secondary: #ff00ff;
+      --dark: #0d0f15;
+      --darker: #090b0f;
+      --card-bg: #1c1f26;
+      --footer-bg: #10121a;
     }
 
-    /* Chrome Only Modal */
-    .modal {
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      height: 100%;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: var(--dark);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    #particles-js {
       position: fixed;
+      width: 100%;
+      height: 100%;
       top: 0;
       left: 0;
-      width: 100vw;
-      height: 100vh;
-      backdrop-filter: blur(6px);
-      background: rgba(0,0,0,0.4);
+      z-index: -1;
+    }
+
+    .content-wrapper {
+      flex: 1;
+      width: 100%;
+      padding-bottom: 40px; /* Space for footer */
+    }
+
+    .header-container {
+      position: relative;
+      padding: 2rem 0;
+      overflow: hidden;
+      width: 100%;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 2.8rem;
+      margin: 0 auto;
+      background: linear-gradient(90deg, #ff4d4d, #00fff7, #ff00c8, #00ff8c);
+      background-size: 300% 300%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: rgbMove 5s linear infinite;
+      position: relative;
+      display: inline-block;
+      padding: 0 20px;
+      width: 100%;
+    }
+
+    h1::before, h1::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      width: 50vw;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, rgba(0, 255, 255, 0.5));
+      transform: translateY(-50%);
+    }
+
+    h1::before {
+      right: 100%;
+      background: linear-gradient(90deg, rgba(0, 255, 255, 0.5), transparent);
+    }
+
+    h1::after {
+      left: 100%;
+    }
+
+    @keyframes rgbMove {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    .header-icon {
+      font-size: 2.5rem;
+      margin-right: 15px;
+      color: var(--primary);
+      vertical-align: middle;
+      text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+    }
+
+    .channel-grid {
       display: flex;
       justify-content: center;
-      align-items: center;
-      z-index: 9999;
-      animation: fadeIn .5s ease;
+      flex-wrap: wrap;
+      gap: 20px;
+      padding: 20px;
+      max-width: 1200px;
+      margin: 0 auto;
+      width: 100%;
     }
-    .modal.hidden { display: none !important; }
-    .modal-content {
-      background: rgba(255, 0, 0, 0.1);
-      border: 1px solid rgba(255, 0, 0, 0.3);
-      border-radius: 20px;
-      padding: 30px 25px;
-      width: 90%;
-      max-width: 400px;
+
+    .channel-card {
+      background-color: var(--card-bg);
+      border-radius: 16px;
+      padding: 15px 15px 10px;
+      width: 180px;
       text-align: center;
-      color: #f3f4f6;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
-      backdrop-filter: blur(12px);
-      transform: scale(.95);
-      animation: scaleIn .4s ease forwards;
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      height: 240px;
+      opacity: 0;
+      transform: translateY(40px);
+      animation: fadeInUp 0.8s forwards;
+      position: relative;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      text-decoration: none;
     }
-    .modal-content h2 { font-size: 24px; font-weight: 700; color: #f87171; margin-bottom: 16px; }
-    .modal-content p { font-size: 16px; color: #d1d5db; margin-bottom: 24px; line-height: 1.5; }
-    @keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }
-    @keyframes scaleIn { to { transform: scale(1); opacity: 1 } }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(40px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .channel-card img {
+      width: 110px;
+      height: 110px;
+      object-fit: contain;
+      margin-bottom: 8px;
+      filter: drop-shadow(0 0 8px var(--primary)) brightness(1.2) contrast(1.2);
+      transition: all 0.3s ease;
+    }
+
+    .channel-card:hover img {
+      transform: scale(1.1);
+      filter: drop-shadow(0 0 12px var(--secondary)) brightness(1.3) contrast(1.3);
+    }
+
+    .channel-card h3 {
+      font-size: 16px;
+      color: #fff;
+      font-weight: 600;
+      margin: 8px 0;
+      position: relative;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      min-height: 40px;
+      line-height: 1.3;
+      width: 100%;
+    }
+
+    .explore-btn {
+      margin-top: auto;
+      margin-bottom: 5px;
+      padding: 10px 20px;
+      background: linear-gradient(45deg, #2c2f35, #3a3d45);
+      color: #fff;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      width: 90%;
+    }
+
+    .explore-btn:hover {
+      background: linear-gradient(45deg, var(--primary), var(--secondary));
+      color: #000;
+      box-shadow: 0 0 15px var(--primary);
+      transform: translateY(-2px);
+    }
+
+    footer {
+      background-color: var(--footer-bg);
+      text-align: center;
+      padding: 30px 20px;
+      width: 100%;
+      position: relative;
+      margin-top: auto;
+    }
+
+    footer::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--primary), transparent);
+    }
+
+    .social-icons {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      margin-bottom: 25px;
+    }
+
+    .social-icon {
+      width: 45px;
+      height: 45px;
+      border-radius: 50%;
+      background: linear-gradient(45deg, var(--card-bg), #2a2d35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 20px;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    .social-icon:hover {
+      transform: translateY(-4px) scale(1.1);
+      box-shadow: 0 8px 16px rgba(0, 255, 255, 0.3);
+    }
+
+    .social-icon.telegram { background: linear-gradient(45deg, #0088cc, #00aced); }
+    .social-icon.youtube { background: linear-gradient(45deg, #ff0000, #e52d27); }
+    .social-icon.whatsapp { background: linear-gradient(45deg, #25D366, #128C7E); }
+    .social-icon.facebook { background: linear-gradient(45deg, #3b5998, #4267B2); }
+
+    .footer-text {
+      margin-top: 20px;
+      color: #aaa;
+      font-size: 13px;
+      position: relative;
+    }
+
+    .footer-text::before {
+      content: '';
+      position: absolute;
+      top: -12px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      h1 {
+        font-size: 2rem;
+        padding: 0 15px;
+      }
+
+      .channel-grid {
+        padding: 15px;
+        gap: 15px;
+      }
+
+      .channel-card {
+        width: calc(50% - 15px);
+        height: 220px;
+      }
+
+      .channel-card img {
+        width: 80px;
+        height: 80px;
+      }
+
+      .social-icons {
+        gap: 15px;
+      }
+
+      .social-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 18px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      h1 {
+        font-size: 1.8rem;
+      }
+
+      .header-icon {
+        font-size: 2rem;
+      }
+
+      .channel-card {
+        width: calc(50% - 10px);
+        height: 200px;
+      }
+
+      .channel-card img {
+        width: 70px;
+        height: 70px;
+      }
+    }
   </style>
 </head>
-<body>
 
-  <!-- Chrome Only Modal -->
-  <div id="chromeModal" class="modal hidden" role="dialog" aria-modal="true">
-    <div class="modal-content">
-      <h2>Please Open in Chrome</h2>
-      <p>This site is optimized for <strong>Google Chrome</strong>. Please open the link in Chrome browser for the best experience.</p>
+<body>
+  <div id="particles-js"></div>
+
+  <div class="content-wrapper">
+    <div class="header-container">
+      <h1><i class="fas fa-satellite-dish header-icon"></i> Allinone Live TV Hub</h1>
+    </div>
+
+    <div class="channel-grid">
+      <a href="https://allinonereborn-jtv.pages.dev/" class="channel-card" target="_blank">
+        <img src="https://widespread-plum-gffbkraoo7-deis8y3f44.edgeone.dev/31GngoiH5pL.png" alt="JioTV Plus">
+        <h3>J-Tv-Plus (WORLD WIDE)</h3>
+        <button class="explore-btn">Explore</button>
+      </a>
+
+      <a href="https://allinonereborn.store/sony/" class="channel-card" target="_blank">
+        <img src="https://widespread-plum-gffbkraoo7-deis8y3f44.edgeone.dev/sony-liv-logo.avif" alt="SonyLiv">
+        <h3>SonyLiv (Worldwide)</h3>
+        <button class="explore-btn">Explore</button>
+      </a>
+
+      <a href="https://allinonereborn.store/events/" class="channel-card" target="_blank">
+        <img src="https://widespread-plum-gffbkraoo7-deis8y3f44.edgeone.dev/Untitled-3.png" alt="SonyLiv Events">
+        <h3>SonyLiv Events (Worldwide)</h3>
+        <button class="explore-btn">Explore</button>
+      </a>
+
+
+      <a href="https://allinonereborn.store/zee5/" class="channel-card" target="_blank">
+        <img src="https://widespread-plum-gffbkraoo7-deis8y3f44.edgeone.dev/51DI1Se1SQL._AC_UF894,1000_QL80_.jpg" alt="Zee5 SD">
+        <h3>Zee5 SD (WorldWide)</h3>
+        <button class="explore-btn">Explore</button>
+      </a>
+
+      <a href="https://allinonereborn.store/fcww/" class="channel-card" target="_blank">
+        <img src="https://widespread-plum-gffbkraoo7-deis8y3f44.edgeone.dev/FanCode_logo.svg.png" alt="Fancode">
+        <h3>Fancode (Worldwide)</h3>
+        <button class="explore-btn">Explore</button>
+      </a>
+
+      <a href="https://allinonereborn.store/airteltv-web/" class="channel-card" target="_blank">
+        <img src="https://i.ibb.co/KxbhPGcn/Sansat-IPTV-Account-Subscription-Better-for-Europe-Germany-Netherlands-Albania-Kurdish-Free-Trial-M3.jpg" alt="airteltv-Web">
+        <h3>Airteltv-Web (Worldwide)</h3>
+        <button class="explore-btn">Explore</button>
+      </a>
+
+      <a href="https://allinonereborn.store/tatatv-web/" class="channel-card" target="_blank">
+        <img src="https://image2url.com/r2/default/images/1767248443138-2c278363-8a00-4c72-91ce-75b5ed82d15b.jpg" alt="tatatv-web">
+        <h3>Tatatv Web (Worldwide)</h3>
+        <button class="explore-btn">Explore</button>
+      </a>
+
+      <a href="https://allinonereborn.store/iptv-web/" class="channel-card" target="_blank">
+        <img src="https://image2url.com/r2/default/images/1767193192335-b023b4ac-34d3-4ee5-ba88-8b5d5062f562.jpg" alt="iptv-web">
+        <h3>Iptv Web (Worldwide)</h3>
+        <button class="explore-btn">Explore</button>
+      </a>
     </div>
   </div>
 
-  <div class="shaka-video-container" data-shaka-player>
-    <video autoplay playsinline preload="metadata" poster=""></video>
-  </div>
+  <footer>
+    <div class="social-icons">
+      <a href="https://t.me/allinone_reborn" target="_blank" class="social-icon telegram">
+        <i class="fab fa-telegram"></i>
+      </a>
+      <a href="https://www.youtube.com/@allinonereborn_amit" target="_blank" class="social-icon youtube">
+        <i class="fab fa-youtube"></i>
+      </a>
+      <a href="https://www.instagram.com/allinonereborn?igsh=dTJkcnhyeXAzamly" target="_blank" class="social-icon instagram">
+        <i class="fab fa-instagram"></i>
+      </a>
+      <a href="https://whatsapp.com/channel/0029Va9Bpmg8KMqlvPLv3P3O" target="_blank" class="social-icon whatsapp">
+        <i class="fab fa-whatsapp"></i>
+      </a>
+      <a href="https://www.facebook.com/ALLINONEAMITYT" target="_blank" class="social-icon facebook">
+        <i class="fab fa-facebook-f"></i>
+      </a>
+    </div>
+    <div class="footer-text">
+      © 2025 Allinone Live TV Hub. All rights reserved.
+    </div>
+  </footer>
 
+  <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
   <script>
-    document.addEventListener('DOMContentLoaded', async () => {
-      /********** Chrome check **********/
-      const isChrome = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
-      if (!isChrome) {
-        const chromeModal = document.getElementById('chromeModal');
-        chromeModal.classList.remove('hidden');
-        chromeModal.setAttribute('aria-hidden', 'false');
-        return; // block video setup in non-Chrome
-      }
-
-      /********** Shaka player setup **********/
-      shaka.polyfill.installAll();
-
-      if (!shaka.Player.isBrowserSupported()) {
-        console.error('Browser not supported');
-      } else {
-        const video = document.querySelector('video');
-        const player = new shaka.Player();
-        await player.attach(video);
-
-        const container = document.querySelector('.shaka-video-container');
-        const ui = new shaka.ui.Overlay(player, container, video);
-
-        ui.configure({
-          controlPanelElements: [
-            'play_pause', 'time_and_duration', 'mute', 'volume',
-            'spacer', 'language', 'captions', 'picture_in_picture',
-            'quality', 'fullscreen'
-          ],
-          volumeBarColors: {
-            base: 'rgba(63, 187, 1, 1)',
-            level: 'rgb(255, 69, 0)'
+    particlesJS("particles-js", {
+      "particles": {
+        "number": {
+          "value": 80,
+          "density": {
+            "enable": true,
+            "value_area": 800
+          }
+        },
+        "color": {
+          "value": ["#00ffff", "#ff00ff", "#00ff00", "#ffffff"]
+        },
+        "shape": {
+          "type": "circle",
+          "stroke": {
+            "width": 0,
+            "color": "#000000"
+          }
+        },
+        "opacity": {
+          "value": 0.5,
+          "random": true,
+          "anim": {
+            "enable": true,
+            "speed": 1,
+            "opacity_min": 0.1,
+            "sync": false
+          }
+        },
+        "size": {
+          "value": 3,
+          "random": true,
+          "anim": {
+            "enable": true,
+            "speed": 2,
+            "size_min": 0.1,
+            "sync": false
+          }
+        },
+        "line_linked": {
+          "enable": true,
+          "distance": 150,
+          "color": "#00ffff",
+          "opacity": 0.2,
+          "width": 1
+        },
+        "move": {
+          "enable": true,
+          "speed": 1,
+          "direction": "none",
+          "random": true,
+          "straight": false,
+          "out_mode": "out",
+          "bounce": false,
+          "attract": {
+            "enable": true,
+            "rotateX": 600,
+            "rotateY": 1200
+          }
+        }
+      },
+      "interactivity": {
+        "detect_on": "canvas",
+        "events": {
+          "onhover": {
+            "enable": true,
+            "mode": "grab"
           },
-          seekBarColors: {
-            base: 'rgb(41, 41, 163)',
-            buffered: 'rgb(35, 99, 3)',
-            played: 'rgba(63, 187, 1, 1)'
-          }
-        });
-
-        let drmConfig = {
-          clearKeys: {
-         "3319513445704d17b607969c9b4bd5b2": "64a75c66e40be8177f4893104722700a"
-          }
-        };
-        let cookieHeader = "";
-        let streamUrl = "https://live-pv-ta.amazon.fastly-edge.com/sin-nitro/live/clients/dash/enc/wdqtgxqtpr/out/v1/d9a29796c1c3468785dbee1776ffd354/cenc.mpd";
-
-        try {
-          const response = await fetch('');
-          const m3uText = await response.text();
-          const lines = m3uText.split('\n');
-
-          for (let i = 0; i < lines.length; i++) {
-            if (lines[i].includes('Star_Sports_HD1')) {
-              for (let j = i - 1; j >= 0; j--) {
-                if (lines[j].startsWith('#EXTHTTP:')) {
-                  const cookieMatch = lines[j].match(/"cookie":"([^"]+)"/);
-                  if (cookieMatch) {
-                    cookieHeader = cookieMatch[1];
-                  }
-                  break;
-                }
-              }
-              break;
+          "onclick": {
+            "enable": true,
+            "mode": "push"
+          },
+          "resize": true
+        },
+        "modes": {
+          "grab": {
+            "distance": 140,
+            "line_linked": {
+              "opacity": 0.5
             }
-          }
-        } catch (error) {
-          console.error('Failed to fetch M3U:', error);
-        }
-
-        player.configure({
-          drm: drmConfig,
-          streaming: {
-            lowLatencyMode: true,
-            bufferingGoal: 15,
-            rebufferingGoal: 2,
-            bufferBehind: 15,
-            retryParameters: { timeout: 10000, maxAttempts: 5, baseDelay: 300, backoffFactor: 1.2 },
-            segmentRequestTimeout: 8000,
-            segmentPrefetchLimit: 2,
-            useNativeHlsOnSafari: true
           },
-          manifest: { retryParameters: { timeout: 8000, maxAttempts: 3 } }
-        });
-
-          if (
-            (type === shaka.net.NetworkingEngine.RequestType.MANIFEST ||
-             type === shaka.net.NetworkingEngine.RequestType.SEGMENT) &&
-            request.uris[0] && !request.uris[0].includes('__hdnea__=')
-          ) {
-            const separator = request.uris[0].includes('?') ? '&' : '?';
-            request.uris[0] += separator + cookieHeader;
+          "push": {
+            "particles_nb": 3
           }
-        });
-
-        try {
-          await player.load(streamUrl);
-        } catch (error) {
-          console.error('Load error:', error);
         }
-      }
+      },
+      "retina_detect": true
+    });
+
+    document.addEventListener('DOMContentLoaded', function() {
+      const cards = document.querySelectorAll('.channel-card');
+      cards.forEach((card, index) => {
+        card.style.animationDelay = `${index * 0.1}s`;
+      });
     });
   </script>
-  <!-- Anti-Adblock Popup -->
-<div class="adb" id="adb" style="display: none;">
-  <div class="adbs">
-    <h3>Adblock/Brave Shields Detected</h3>
-    <p>Please disable your adblocker or Brave Shields to continue browsing this site.</p>
-  </div>
-</div>
-
-<style>
-.adb {
-  position: fixed;
-  width: 100%;
-  height: 100%;
-  left: 0;
-  top: 0;
-  background: rgba(0, 0, 0, 0.85);
-  z-index: 99999;
-  display: none;
-  align-items: center;
-  justify-content: center;
-}
-.adbs {
-  background: #fff;
-  padding: 30px;
-  border-radius: 12px;
-  box-shadow: 0 5px 25px rgba(0, 0, 0, 0.4);
-  text-align: center;
-  max-width: 400px;
-  width: 90%;
-}
-@keyframes glow {
-  from { text-shadow: 0 0 0px #ff0000; }
-  to { text-shadow: 0 0 1px #ff0000; }
-}
-.adbs h3 {
-  color: #d00;
-  font-size: 24px;
-  margin-bottom: 15px;
-}
-.adbs p {
-  font-size: 16px;
-  color: #333;
-}
-</style>
-
 
 </body>
 </html>
-
-
